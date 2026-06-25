@@ -1,0 +1,6 @@
+parser.tab.c
+parser.tab.h
+compilador
+semantic.o
+lex.yy.c
+ast.o

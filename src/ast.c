@@ -3,9 +3,12 @@
 #include <string.h>
 #include "ast.h"
 
-NodoAST *crearNodo(TipoNodo tipo) {
+/* Constructor base */
+NodoAST *crearNodo(TipoNodo tipo, int linea, int columna) {
     NodoAST *n = malloc(sizeof(NodoAST));
     n->tipo = tipo;
+    n->linea = linea;
+    n->columna = columna;
     n->nombre = NULL;
     n->valorNumerico = 0.0;
     n->izq = n->der = n->cond = n->cuerpo = n->sino = n->arg1 = n->arg2 = n->sig = NULL;
@@ -13,41 +16,41 @@ NodoAST *crearNodo(TipoNodo tipo) {
     return n;
 }
 
-NodoAST *crearNodoID(char *nombre) {
-    NodoAST *n = crearNodo(NODO_IDENTIFICADOR);
+NodoAST *crearNodoID(char *nombre, int linea, int columna) {
+    NodoAST *n = crearNodo(NODO_IDENTIFICADOR, linea, columna);
     n->nombre = strdup(nombre);
     return n;
 }
 
-NodoAST *crearNodoNum(double val) {
-    NodoAST *n = crearNodo(NODO_LITERAL_NUM);
+NodoAST *crearNodoNum(double val, int linea, int columna) {
+    NodoAST *n = crearNodo(NODO_LITERAL_NUM, linea, columna);
     n->valorNumerico = val;
     return n;
 }
 
-NodoAST *crearNodoCad(char *cad) {
-    NodoAST *n = crearNodo(NODO_LITERAL_CAD);
+NodoAST *crearNodoCad(char *cad, int linea, int columna) {
+    NodoAST *n = crearNodo(NODO_LITERAL_CAD, linea, columna);
     n->nombre = strdup(cad);
     return n;
 }
 
-NodoAST *crearNodoBinario(Operador op, NodoAST *izq, NodoAST *der) {
-    NodoAST *n = crearNodo(NODO_BINARIO);
+NodoAST *crearNodoBinario(Operador op, NodoAST *izq, NodoAST *der, int linea, int columna) {
+    NodoAST *n = crearNodo(NODO_BINARIO, linea, columna);
     n->op = op;
     n->izq = izq;
     n->der = der;
     return n;
 }
 
-NodoAST *crearNodoUnario(Operador op, NodoAST *expr) {
-    NodoAST *n = crearNodo(NODO_UNARIO);
+NodoAST *crearNodoUnario(Operador op, NodoAST *expr, int linea, int columna) {
+    NodoAST *n = crearNodo(NODO_UNARIO, linea, columna);
     n->op = op;
     n->izq = expr;
     return n;
 }
 
-NodoAST *crearNodoCifrado(char *oper, char *metodo, NodoAST *arg1, NodoAST *arg2) {
-    NodoAST *n = crearNodo(NODO_LLAMADA_CIFRADO);
+NodoAST *crearNodoCifrado(char *oper, char *metodo, NodoAST *arg1, NodoAST *arg2, int linea, int columna) {
+    NodoAST *n = crearNodo(NODO_LLAMADA_CIFRADO, linea, columna);
     n->operCifrado = strdup(oper);
     n->metodo = strdup(metodo);
     n->arg1 = arg1;
@@ -55,6 +58,7 @@ NodoAST *crearNodoCifrado(char *oper, char *metodo, NodoAST *arg1, NodoAST *arg2
     return n;
 }
 
+/* Impresión con sangría para depuración */
 static void imprimirSangria(int nivel) {
     for (int i = 0; i < nivel; i++) printf("  ");
 }
@@ -68,15 +72,18 @@ void imprimirAST(NodoAST *nodo, int nivel) {
             if (nodo->cuerpo) imprimirAST(nodo->cuerpo, nivel + 1);
             break;
         case NODO_DECL_MENSAJE:
-            printf("DeclMensaje: %s\n", nodo->nombre);
+            printf("DeclMensaje: %s", nodo->nombre);
+            printf(" (línea %d, col %d)\n", nodo->linea, nodo->columna);
             if (nodo->der) imprimirAST(nodo->der, nivel + 1);
             break;
         case NODO_DECL_CLAVE:
-            printf("DeclClave: %s\n", nodo->nombre);
+            printf("DeclClave: %s", nodo->nombre);
+            printf(" (línea %d, col %d)\n", nodo->linea, nodo->columna);
             if (nodo->der) imprimirAST(nodo->der, nivel + 1);
             break;
         case NODO_ASIGNACION:
-            printf("Asignacion: %s\n", nodo->nombre);
+            printf("Asignacion: %s", nodo->nombre);
+            printf(" (línea %d, col %d)\n", nodo->linea, nodo->columna);
             if (nodo->der) imprimirAST(nodo->der, nivel + 1);
             break;
         case NODO_IMPRIMIR:
@@ -84,7 +91,7 @@ void imprimirAST(NodoAST *nodo, int nivel) {
             if (nodo->der) imprimirAST(nodo->der, nivel + 1);
             break;
         case NODO_SI:
-            printf("Si:\n");
+            printf("Si (línea %d, col %d):\n", nodo->linea, nodo->columna);
             imprimirSangria(nivel + 1); printf("Cond:\n");
             if (nodo->cond) imprimirAST(nodo->cond, nivel + 2);
             imprimirSangria(nivel + 1); printf("Cuerpo:\n");
@@ -95,32 +102,32 @@ void imprimirAST(NodoAST *nodo, int nivel) {
             }
             break;
         case NODO_MIENTRAS:
-            printf("Mientras:\n");
+            printf("Mientras (línea %d, col %d):\n", nodo->linea, nodo->columna);
             imprimirSangria(nivel + 1); printf("Cond:\n");
             if (nodo->cond) imprimirAST(nodo->cond, nivel + 2);
             imprimirSangria(nivel + 1); printf("Cuerpo:\n");
             if (nodo->cuerpo) imprimirAST(nodo->cuerpo, nivel + 2);
             break;
         case NODO_BINARIO:
-            printf("BinOp: %d\n", nodo->op);
+            printf("BinOp: %d (línea %d, col %d)\n", nodo->op, nodo->linea, nodo->columna);
             if (nodo->izq) imprimirAST(nodo->izq, nivel + 1);
             if (nodo->der) imprimirAST(nodo->der, nivel + 1);
             break;
         case NODO_UNARIO:
-            printf("UnOp: %d\n", nodo->op);
+            printf("UnOp: %d (línea %d, col %d)\n", nodo->op, nodo->linea, nodo->columna);
             if (nodo->izq) imprimirAST(nodo->izq, nivel + 1);
             break;
         case NODO_LITERAL_NUM:
-            printf("Num: %g\n", nodo->valorNumerico);
+            printf("Num: %g (línea %d, col %d)\n", nodo->valorNumerico, nodo->linea, nodo->columna);
             break;
         case NODO_LITERAL_CAD:
-            printf("Cad: %s\n", nodo->nombre);
+            printf("Cad: %s (línea %d, col %d)\n", nodo->nombre, nodo->linea, nodo->columna);
             break;
         case NODO_IDENTIFICADOR:
-            printf("ID: %s\n", nodo->nombre);
+            printf("ID: %s (línea %d, col %d)\n", nodo->nombre, nodo->linea, nodo->columna);
             break;
         case NODO_LLAMADA_CIFRADO:
-            printf("Cifrado: %s %s\n", nodo->operCifrado, nodo->metodo);
+            printf("Cifrado: %s %s (línea %d, col %d)\n", nodo->operCifrado, nodo->metodo, nodo->linea, nodo->columna);
             if (nodo->arg1) imprimirAST(nodo->arg1, nivel + 1);
             if (nodo->arg2) imprimirAST(nodo->arg2, nivel + 1);
             break;

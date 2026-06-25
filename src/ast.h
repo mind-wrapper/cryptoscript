@@ -25,6 +25,8 @@ typedef enum {
 
 typedef struct NodoAST {
     TipoNodo tipo;
+    int linea;            // <-- nuevo
+    int columna;          // <-- nuevo
     char *nombre;
     double valorNumerico;
     Operador op;
@@ -40,13 +42,13 @@ typedef struct NodoAST {
     struct NodoAST *sig;
 } NodoAST;
 
-NodoAST *crearNodo(TipoNodo tipo);
-NodoAST *crearNodoID(char *nombre);
-NodoAST *crearNodoNum(double val);
-NodoAST *crearNodoCad(char *cad);
-NodoAST *crearNodoBinario(Operador op, NodoAST *izq, NodoAST *der);
-NodoAST *crearNodoUnario(Operador op, NodoAST *expr);
-NodoAST *crearNodoCifrado(char *oper, char *metodo, NodoAST *arg1, NodoAST *arg2);
+NodoAST *crearNodo(TipoNodo tipo, int linea, int columna);
+NodoAST *crearNodoID(char *nombre, int linea, int columna);
+NodoAST *crearNodoNum(double val, int linea, int columna);
+NodoAST *crearNodoCad(char *cad, int linea, int columna);
+NodoAST *crearNodoBinario(Operador op, NodoAST *izq, NodoAST *der, int linea, int columna);
+NodoAST *crearNodoUnario(Operador op, NodoAST *expr, int linea, int columna);
+NodoAST *crearNodoCifrado(char *oper, char *metodo, NodoAST *arg1, NodoAST *arg2, int linea, int columna);
 void imprimirAST(NodoAST *nodo, int nivel);
 
 #endif

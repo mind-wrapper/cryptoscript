@@ -1,0 +1,10 @@
+mensaje texto = "hola mundo";
+clave k1 = 3;
+clave k2 = "secreto";
+imprimir cifrar cesar(texto, k1);
+imprimir cifrar vigenere(texto, k2);
+imprimir descifrar cesar(cifrar cesar(texto, k1), k1);
+si (k1 > 0) {
+    mensaje otro = "test";
+    imprimir otro;
+}

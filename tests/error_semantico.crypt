@@ -1,0 +1,3 @@
+mensaje texto = "hola";
+clave k = "abc";
+imprimir cifrar cesar(texto, k);
